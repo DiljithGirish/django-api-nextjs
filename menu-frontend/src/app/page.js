@@ -8,7 +8,8 @@ import { useRouter, useSearchParams } from "next/navigation";
  * @param {number} id The ID of the menu item to retrieve.
  */
 async function deleteMenu(id) {
-  const res = await fetch(`http://127.0.0.1:8000/api/menu/${id}/`, {
+  const api = process.env.NEXT_PUBLIC_API_URL;
+  const res = await fetch(`${api}/api/menu/${id}/`, {
     method: "DELETE",
   });
   if (!res.ok) {
@@ -21,7 +22,8 @@ async function deleteMenu(id) {
  * Fetches menu data from the server.
  */
 async function getData() {
-  const res = await fetch("http://127.0.0.1:8000/api/menu/");
+  const api = process.env.NEXT_PUBLIC_API_URL;
+  const res = await fetch(`${api}/api/menu/`);
   if (!res.ok) {
     throw new Error("Failed to fetch data");
   }
