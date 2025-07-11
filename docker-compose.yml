@@ -2,29 +2,48 @@
 version: "3.8"
 
 services:
+  
+  db:
+    image: postgres:15-alpine
+    container_name: menu-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"           
+
+  
   backend:
     build:
       context: .
       dockerfile: Dockerfile.backend
+    environment:
+      DJANGO_ALLOWED_HOSTS: "localhost,backend"
+      DEBUG: "True"
+      DATABASE_URL: "postgres://user:password@db:5432/db"
+    depends_on:
+      - db
     ports:
       - "8000:8000"
-    volumes:
-      - .:/app
-    environment:
-      - DEBUG=True
-      - DJANGO_ALLOWED_HOSTS=*,localhost,backend
-      - DATABASE_URL=sqlite:///db.sqlite3
 
+  
   frontend:
     build:
       context: .
       dockerfile: Dockerfile.frontend
     env_file:
-      - ./menu-frontend/.env.local    
+      - ./menu-frontend/.env.local
     ports:
       - "3000:3000"
     depends_on:
       - backend
+
+volumes:
+  db_data:
 
 
 
