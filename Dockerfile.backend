@@ -1,0 +1,29 @@
+# -------- Stage 1: build layer --------
+FROM python:3.11-slim AS builder
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+WORKDIR /build
+
+COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --prefix=/install -r requirements.txt
+
+COPY . /build
+
+# -------- Stage 2: runtime layer -------
+FROM python:3.11-slim
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+
+# copy installed deps + source code from builder
+COPY --from=builder /install /usr/local
+COPY --from=builder /build /app
+
+WORKDIR /app
+
+# helper scripts
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY postgres.sh   /usr/local/bin/postgres.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/postgres.sh
+
+EXPOSE 8000
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+

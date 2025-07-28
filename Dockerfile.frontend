@@ -1,0 +1,31 @@
+# -------- Stage 1: Build --------
+FROM node:18-alpine as builder
+
+WORKDIR /app
+
+# Accept build-time variable
+ARG NEXT_PUBLIC_BACKEND_URL
+
+# Pass it to the build process
+ENV NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL}
+
+COPY menu-frontend/package*.json ./
+RUN npm ci --no-audit --progress=false
+
+COPY menu-frontend ./
+
+RUN npm run build
+
+# -------- Stage 2: Runtime --------
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app ./
+
+EXPOSE 3000
+CMD ["npm", "start"]
+
+
+
+

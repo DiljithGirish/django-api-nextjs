@@ -1,110 +1,113 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 /**
- * Fetches a menu item by ID.
- * @param {number} id The ID of the menu item to retrieve.
+ * Fetches menu data from the API using relative path.
  */
-async function getMenu(id) {
-  const res = await fetch(`http://127.0.0.1:8000/api/menu/${id}/`);
+async function getMenu() {
+  const res = await fetch("/api/menu");
   if (!res.ok) {
-    throw new Error("Failed to retrieve menu");
+    throw new Error("Failed to fetch menu");
   }
   return res.json();
 }
 
 /**
- * Updates a menu item by ID.
- * @param {number} id The ID of the menu item to update.
- * @param {Object} data The updated data for the menu item.
+ * Deletes a menu item by ID using relative API path.
  */
-async function updateMenu(id, data) {
-  const res = await fetch(`http://127.0.0.1:8000/api/menu/${id}/`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
+async function deleteMenu(id) {
+  const res = await fetch(`/api/menu/${id}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    throw new Error("Failed to delete menu");
+  }
+}
+
+/**
+ * The main home page component showing all menu items.
+ */
+export default function Page() {
+  const [menuItems, setMenuItems] = useState(null);
+  const [displaySuccessMessage, setDisplaySuccessMessage] = useState({
+    show: false,
+    type: "",
   });
 
-  if (!res.ok) {
-    throw new Error("Failed to update menu");
-  }
-  return res.json();
-}
-
-const Page = ({ params }) => {
   const router = useRouter();
-  const [formData, setFormData] = useState({ name: "", price: "" });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const params = useSearchParams();
 
-  /**
-   * Handles form submission.
-   * @param {Event} event The form submission event.
-   */
-  const onFinish = (event) => {
-    event.preventDefault();
-    setIsLoading(true);
-    updateMenu(params.menuId, formData)
-      .then(() => {
-        router.replace("/?action=update");
-      })
-      .catch(() => {
-        setError("An error occurred");
-        setIsLoading(false);
-      });
-  };
-
-  // Cleanup effect for resetting loading state
   useEffect(() => {
-    return () => setIsLoading(false);
+    const fetchMenu = async () => {
+      const data = await getMenu();
+      setMenuItems(data);
+    };
+    fetchMenu().catch(console.error);
   }, []);
 
-  // Fetch menu item data on component mount
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getMenu(params.menuId);
-        setFormData({ name: data.name, price: data.price });
-      } catch (error) {
-        setError(error.message);
+    if (params.get("action")) {
+      setDisplaySuccessMessage({
+        type: params.get("action"),
+        show: true,
+      });
+      router.replace("/");
+    }
+  }, [params, router]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (displaySuccessMessage.show) {
+        setDisplaySuccessMessage({ show: false, type: "" });
       }
-    };
-    fetchData();
-  }, [params.menuId]);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [displaySuccessMessage.show]);
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteMenu(id);
+      setMenuItems((items) => items.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error("Error deleting item:", error);
+    }
+  };
 
   return (
-    <form onSubmit={onFinish}>
-      <div className="form-item">
-        <label htmlFor="name">Name</label>
-        <input
-          required
-          name="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-        />
-      </div>
-      <div className="form-item">
-        <label htmlFor="price">Price</label>
-        <input
-          required
-          type="number"
-          name="price"
-          value={formData.price}
-          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-        />
-      </div>
-      {error && <p className="error-message">{error}</p>}
-      <div>
-        <button disabled={isLoading} className="add-button" type="submit">
-          Submit
-        </button>
-      </div>
-    </form>
-  );
-};
+    <div>
+      <button className="add-button" onClick={() => router.push("/add")}>
+        Add
+      </button>
 
-export default Page;
+      {displaySuccessMessage.show && (
+        <p className="success-message">
+          {displaySuccessMessage.type === "add" ? "Added a" : "Modified a"} menu item.
+        </p>
+      )}
+
+      {menuItems ? (
+        menuItems.map((item) => (
+          <div className="menu-item" key={item.id}>
+            <div className="menu-item-info">
+              <div className="menu-item-name">{item.name}</div>
+              <div className="menu-item-price">${item.price.toFixed(2)}</div>
+            </div>
+            <div className="menu-item-actions">
+              <button className="edit-button" onClick={() => router.push(`/update/${item.id}`)}>
+                Edit
+              </button>
+              <button className="delete-button" onClick={() => handleDelete(item.id)}>
+                Delete
+              </button>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p>Loading...</p>
+      )}
+    </div>
+  );
+}
+

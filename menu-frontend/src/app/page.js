@@ -4,24 +4,23 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 /**
- * Fetches a menu item by ID.
- * @param {number} id The ID of the menu item to retrieve.
+ * Deletes a menu item by ID using relative API path.
  */
 async function deleteMenu(id) {
-  const res = await fetch(`http://127.0.0.1:8000/api/menu/${id}/`, {
+  const res = await fetch(`/api/menu/${id}`, {
     method: "DELETE",
   });
   if (!res.ok) {
-    throw new Error("Failed to retrieve menu");
+    throw new Error("Failed to delete menu");
   }
   return Promise.resolve();
 }
 
 /**
- * Fetches menu data from the server.
+ * Fetches menu data from the server using relative API path.
  */
 async function getData() {
-  const res = await fetch("http://127.0.0.1:8000/api/menu/");
+  const res = await fetch(`/api/menu`);
   if (!res.ok) {
     throw new Error("Failed to fetch data");
   }
@@ -63,13 +62,11 @@ export default function Page() {
   const router = useRouter();
   const params = useSearchParams();
 
-  // State for displaying a success message
   const [displaySuccessMessage, setDisplaySuccessMessage] = useState({
     show: false,
-    type: "", // either 'add' or 'update'
+    type: "",
   });
 
-  // Fetch menu items on component mount
   useEffect(() => {
     const fetchData = async () => {
       const data = await getData();
@@ -78,7 +75,6 @@ export default function Page() {
     fetchData().catch(console.error);
   }, []);
 
-  // Detect changes in URL parameters for success messages
   useEffect(() => {
     if (!!params.get("action")) {
       setDisplaySuccessMessage({
@@ -89,7 +85,6 @@ export default function Page() {
     }
   }, [params, router]);
 
-  // Automatically hide the success message after 3 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
       if (displaySuccessMessage.show) {
@@ -99,7 +94,6 @@ export default function Page() {
     return () => clearTimeout(timer);
   }, [displaySuccessMessage.show]);
 
-  // Handle deletion of a menu item
   const handleDelete = (id) => {
     setMenuItems((items) => items.filter((item) => item.id !== id));
   };
@@ -132,3 +126,4 @@ export default function Page() {
     </div>
   );
 }
+

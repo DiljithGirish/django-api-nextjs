@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 /**
- * Sends a POST request to create a new menu item.
+ * Sends a POST request to create a new menu item using relative API path.
  * @param {Object} data The menu item data to be sent.
  */
 async function createMenu(data) {
-  const res = await fetch("http://127.0.0.1:8000/api/menu/", {
+  const res = await fetch(`/api/menu`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -38,7 +38,6 @@ const Page = () => {
     setIsLoading(true);
     createMenu(formData)
       .then(() => {
-        // Navigate to the main page with a query parameter indicating success
         router.replace("/?action=add");
       })
       .catch(() => {
@@ -47,7 +46,6 @@ const Page = () => {
       });
   };
 
-  // Cleanup effect for resetting loading state
   useEffect(() => {
     return () => setIsLoading(false);
   }, []);
@@ -88,3 +86,4 @@ const Page = () => {
 };
 
 export default Page;
+

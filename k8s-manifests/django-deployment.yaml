@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-backend
+  namespace: menu-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: django-backend
+  template:
+    metadata:
+      labels:
+        app: django-backend
+    spec:
+      containers:
+        - name: django
+          image: django-api-nextjs-backend:latest
+          imagePullPolicy: Never  
+          ports:
+            - containerPort: 8000
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: menu-app-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: menu-app-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: menu-app-secret
+                  key: POSTGRES_DB
+            - name: POSTGRES_HOST
+              value: db
+            - name: POSTGRES_PORT
+              value: "5432"
+          command: ["/bin/bash", "-c"]
+          args: ["bash /app/entrypoint.sh"]
+          volumeMounts:
+            - name: entrypoint-volume
+              mountPath: /app/entrypoint.sh
+              subPath: entrypoint.sh
+              readOnly: true
+            - name: postgres-sh-volume
+              mountPath: /usr/local/bin/postgres.sh
+              subPath: postgres.sh
+              readOnly: true
+      volumes:
+        - name: entrypoint-volume
+          configMap:
+            name: django-entrypoint-configmap
+        - name: postgres-sh-volume
+          configMap:
+            name: django-postgres-sh-configmap
+
