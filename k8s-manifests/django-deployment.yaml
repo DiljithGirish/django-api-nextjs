@@ -1,3 +1,4 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -46,15 +47,16 @@ spec:
               mountPath: /app/entrypoint.sh
               subPath: entrypoint.sh
               readOnly: true
-            - name: postgres-sh-volume
-              mountPath: /usr/local/bin/postgres.sh
-              subPath: postgres.sh
-              readOnly: true
+            
+              
+              
+              
       volumes:
         - name: entrypoint-volume
           configMap:
             name: django-entrypoint-configmap
-        - name: postgres-sh-volume
-          configMap:
-            name: django-postgres-sh-configmap
+        
+          
+            
+
 

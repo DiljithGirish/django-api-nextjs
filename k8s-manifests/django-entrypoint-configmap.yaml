@@ -8,15 +8,12 @@ data:
     #!/usr/bin/env bash
     set -e
 
-   
-    
     if [ -n "${POSTGRES_HOST}" ]; then
       echo "⏳ Waiting for PostgreSQL at ${POSTGRES_HOST}:${POSTGRES_PORT}..."
       /usr/local/bin/postgres.sh
     else
       echo "⚠️ POSTGRES_HOST is not set. Skipping PostgreSQL wait."
     fi
-    
 
     echo "🛠  migrate" && python manage.py migrate --no-input
 
@@ -26,3 +23,4 @@ data:
     exec gunicorn RestaurantCore.wsgi:application \
       --bind 0.0.0.0:8000 \
       --workers "${GUNICORN_WORKERS:-3}"
+
