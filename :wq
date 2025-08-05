@@ -1,9 +1,0 @@
-cat .env 
-# PostgreSQL credentials
-POSTGRES_USER=your_pg_user
-POSTGRES_PASSWORD=your_pg_password
-POSTGRES_DB=your_pg_db
-
-# Next.js frontend environment variable
-NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
-

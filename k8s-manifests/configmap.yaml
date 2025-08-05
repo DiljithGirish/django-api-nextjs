@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: menu-app-config
-  namespace: menu-app
-data:
-  NEXT_PUBLIC_BACKEND_URL: http://django-api-nextjs-backend:8000
-

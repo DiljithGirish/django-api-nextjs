@@ -1,4 +1,3 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,7 +16,7 @@ spec:
       containers:
         - name: django
           image: django-api-nextjs-backend:latest
-          imagePullPolicy: Never  
+          imagePullPolicy: Never
           ports:
             - containerPort: 8000
           env:
@@ -40,23 +39,4 @@ spec:
               value: db
             - name: POSTGRES_PORT
               value: "5432"
-          command: ["/bin/bash", "-c"]
-          args: ["bash /app/entrypoint.sh"]
-          volumeMounts:
-            - name: entrypoint-volume
-              mountPath: /app/entrypoint.sh
-              subPath: entrypoint.sh
-              readOnly: true
-            
-              
-              
-              
-      volumes:
-        - name: entrypoint-volume
-          configMap:
-            name: django-entrypoint-configmap
-        
-          
-            
-
 
