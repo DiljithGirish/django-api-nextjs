@@ -48,7 +48,7 @@ const Page = ({ params }) => {
   const onFinish = (event) => {
     event.preventDefault();
     setIsLoading(true);
-    updateMenu(params.id, formData) // changed from params.menuId → params.id
+    updateMenu(params.menuId, formData)
       .then(() => {
         router.replace("/?action=update");
       })
@@ -67,14 +67,14 @@ const Page = ({ params }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getMenu(params.id); // changed from params.menuId → params.id
+        const data = await getMenu(params.menuId);
         setFormData({ name: data.name, price: data.price });
       } catch (error) {
         setError(error.message);
       }
     };
     fetchData();
-  }, [params.id]);
+  }, [params.menuId]);
 
   return (
     <form onSubmit={onFinish}>
@@ -94,9 +94,7 @@ const Page = ({ params }) => {
           type="number"
           name="price"
           value={formData.price}
-          onChange={(e) =>
-            setFormData({ ...formData, price: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
         />
       </div>
       {error && <p className="error-message">{error}</p>}
